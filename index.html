@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AuraTask - A premium glassmorphic to-do list and focus productivity application with integrated Pomodoro timer and statistics.">
+  <title>AuraTask - Premium Focus & To-Do App</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <!-- Dynamic Gradient Backdrop -->
+  <div class="backdrop-glow"></div>
+  
+  <div class="app-container">
+    <!-- Sidebar / Aside Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <i data-lucide="sparkles" class="logo-icon animate-pulse"></i>
+        </div>
+        <h1 class="brand-name">AuraTask</h1>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <h2 class="nav-section-title">Views</h2>
+          <ul class="nav-list">
+            <li>
+              <button class="nav-btn active" id="view-all-btn">
+                <i data-lucide="layout-grid"></i>
+                <span>Dashboard</span>
+              </button>
+            </li>
+            <li>
+              <button class="nav-btn" id="view-focus-btn">
+                <i data-lucide="timer"></i>
+                <span>Focus Mode</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-header">
+            <h2 class="nav-section-title">Categories</h2>
+            <button class="add-category-btn" id="add-category-btn" title="Add Category">
+              <i data-lucide="plus"></i>
+            </button>
+          </div>
+          <ul class="nav-list" id="category-list">
+            <!-- Dynamic Categories will load here -->
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Pomodoro Widget in Sidebar -->
+      <section class="pomodoro-widget" aria-label="Pomodoro Focus Timer">
+        <div class="widget-header">
+          <span class="widget-title">Focus Session</span>
+          <span class="timer-mode-tag" id="timer-mode-tag">Focus</span>
+        </div>
+        <div class="widget-timer" id="widget-timer-display">25:00</div>
+        
+        <div class="widget-controls">
+          <button class="control-btn" id="timer-start-pause-btn" title="Start/Pause Focus">
+            <i data-lucide="play" id="play-pause-icon"></i>
+          </button>
+          <button class="control-btn" id="timer-reset-btn" title="Reset Session">
+            <i data-lucide="rotate-ccw"></i>
+          </button>
+        </div>
+        
+        <div class="active-focus-task-container" id="active-focus-task-container">
+          <p class="focus-label">Focusing on:</p>
+          <p class="focus-task-name" id="focus-task-name">No active task</p>
+        </div>
+      </section>
+
+      <!-- Theme Switcher -->
+      <div class="sidebar-footer">
+        <button class="theme-toggle-btn" id="theme-toggle-btn" aria-label="Toggle Theme">
+          <i data-lucide="sun" class="sun-icon"></i>
+          <i data-lucide="moon" class="moon-icon"></i>
+          <span id="theme-text">Light Mode</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Bar / Navigation Controls -->
+      <header class="topbar">
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle Sidebar">
+          <i data-lucide="menu"></i>
+        </button>
+        
+        <div class="search-bar">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="task-search-input" placeholder="Search tasks, tags..." aria-label="Search tasks">
+        </div>
+
+        <div class="quick-status" id="quick-status-date">
+          Sunday, June 14
+        </div>
+      </header>
+
+      <!-- Dashboard View -->
+      <div class="view-panel" id="dashboard-view">
+        <!-- Analytics/Stats Dashboard -->
+        <section class="dashboard-stats" aria-label="Task Analytics">
+          <div class="stat-card glass-card">
+            <div class="stat-info">
+              <h3>Completion Rate</h3>
+              <p class="stat-number" id="stat-completion-pct">0%</p>
+              <p class="stat-subtext" id="stat-ratio-text">0 of 0 completed</p>
+            </div>
+            <div class="stat-visual">
+              <svg width="80" height="80" viewBox="0 0 80 80" class="progress-ring">
+                <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.08)" stroke-width="6" fill="transparent" r="34" cx="40" cy="40"/>
+                <circle class="progress-ring__circle" id="stat-progress-circle" stroke="url(#gradient-accent)" stroke-width="6" fill="transparent" r="34" cx="40" cy="40"/>
+                <defs>
+                  <linearGradient id="gradient-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="var(--gradient-start)" />
+                    <stop offset="100%" stop-color="var(--gradient-end)" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
+
+          <div class="stat-card glass-card">
+            <div class="stat-info">
+              <h3>Upcoming Deadlines</h3>
+              <p class="stat-number" id="stat-upcoming-count">0</p>
+              <p class="stat-subtext">Due in the next 48h</p>
+            </div>
+            <div class="stat-icon-wrapper urgency-accent">
+              <i data-lucide="alarm-clock" class="stat-icon animate-pulse"></i>
+            </div>
+          </div>
+
+          <div class="stat-card glass-card">
+            <div class="stat-info">
+              <h3>Focus Time Spent</h3>
+              <p class="stat-number" id="stat-focus-time">0h 0m</p>
+              <p class="stat-subtext" id="stat-focus-sessions">0 sessions finished</p>
+            </div>
+            <div class="stat-icon-wrapper focus-accent">
+              <i data-lucide="hourglass" class="stat-icon"></i>
+            </div>
+          </div>
+        </section>
+
+        <!-- Task Adding Input Card -->
+        <section class="task-input-section glass-card" aria-label="Add New Task">
+          <form id="new-task-form" class="task-form">
+            <div class="form-row-main">
+              <input type="text" id="task-title-input" placeholder="What is your next quest?..." required aria-label="Task title">
+              <button type="submit" class="submit-task-btn" id="submit-task-btn">
+                <span>Add Task</span>
+                <i data-lucide="plus-circle"></i>
+              </button>
+            </div>
+            
+            <div class="form-row-options">
+              <!-- Category Picker -->
+              <div class="option-group">
+                <label for="task-category-select"><i data-lucide="tag"></i> Category</label>
+                <select id="task-category-select">
+                  <!-- Dynamic categories will populate here -->
+                </select>
+              </div>
+
+              <!-- Priority Selector -->
+              <div class="option-group">
+                <label for="task-priority-select"><i data-lucide="flag"></i> Priority</label>
+                <select id="task-priority-select">
+                  <option value="low">Low</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+
+              <!-- Due Date Selector -->
+              <div class="option-group">
+                <label for="task-due-date"><i data-lucide="calendar"></i> Due Date</label>
+                <input type="date" id="task-due-date" aria-label="Due date">
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <!-- Task Filters & Group Header -->
+        <div class="task-list-header">
+          <h2 class="section-title" id="current-view-title">Active Tasks</h2>
+          
+          <div class="list-filters">
+            <!-- Filter Options -->
+            <button class="filter-chip active" id="filter-all-btn">All</button>
+            <button class="filter-chip" id="filter-active-btn">Active</button>
+            <button class="filter-chip" id="filter-completed-btn">Completed</button>
+            
+            <div class="divider"></div>
+            
+            <!-- Sorting dropdown -->
+            <select class="sort-dropdown" id="sort-select" aria-label="Sort tasks">
+              <option value="dueDate">Due Date</option>
+              <option value="priority">Priority</option>
+              <option value="creation">Date Created</option>
+              <option value="alphabetical">Alphabetical</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Task Listing Wrapper -->
+        <section class="task-list-wrapper" id="task-list-container" aria-label="To-Do Task List">
+          <!-- Dynamic Task items injected here -->
+          <div class="empty-state" id="empty-state">
+            <i data-lucide="clipboard-list" class="empty-icon"></i>
+            <p class="empty-title">All quiet on the task front</p>
+            <p class="empty-subtitle">Add a task above or select a different filter to start organizing your day.</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- Focus Mode Dedicated Panel (Collapsible/Hidden by default) -->
+      <div class="view-panel hidden" id="focus-view">
+        <section class="focus-dashboard glass-card" aria-label="Focus mode controls">
+          <div class="focus-timer-container">
+            <div class="timer-outer-ring">
+              <div class="timer-inner-card">
+                <span class="focus-timer-label" id="focus-timer-label-main">Focus Session</span>
+                <h2 class="focus-timer-large" id="focus-timer-display-main">25:00</h2>
+                <span class="focus-timer-task" id="focus-timer-task-main">Select a task below to start focusing</span>
+              </div>
+            </div>
+            
+            <div class="focus-controls">
+              <button class="focus-main-btn start-session-btn" id="focus-start-btn">
+                <i data-lucide="play"></i> Start Focusing
+              </button>
+              <button class="focus-secondary-btn" id="focus-skip-btn" title="Skip to next session">
+                <i data-lucide="skip-forward"></i>
+              </button>
+              <button class="focus-secondary-btn" id="focus-reset-btn" title="Reset focus session">
+                <i data-lucide="rotate-ccw"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="focus-settings">
+            <h3>Timer Customization</h3>
+            <div class="settings-grid">
+              <div class="settings-control">
+                <label for="focus-duration">Focus (min)</label>
+                <input type="number" id="focus-duration" value="25" min="1" max="60">
+              </div>
+              <div class="settings-control">
+                <label for="break-duration">Short Break (min)</label>
+                <input type="number" id="break-duration" value="5" min="1" max="30">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="focus-task-list glass-card" aria-label="Select a task to focus on">
+          <h3>Select Task to Focus On</h3>
+          <div class="focus-tasks-grid" id="focus-tasks-grid">
+            <!-- Inject focus-friendly task buttons/cards here -->
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Dialog / Modals -->
+  <!-- 1. Add Category Modal -->
+  <dialog id="add-category-dialog" class="glass-dialog">
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <h2>Create Custom Category</h2>
+        <button class="dialog-close-btn" id="close-category-dialog-btn"><i data-lucide="x"></i></button>
+      </div>
+      <form id="add-category-form">
+        <div class="dialog-body">
+          <div class="input-group">
+            <label for="category-name-input">Category Name</label>
+            <input type="text" id="category-name-input" placeholder="e.g. Life, Learning, Project X" required>
+          </div>
+          
+          <div class="input-group">
+            <label>Choose Color Accent</label>
+            <div class="color-picker-grid">
+              <label class="color-swatch-container">
+                <input type="radio" name="category-color" value="#a855f7" checked>
+                <span class="swatch" style="background-color: #a855f7;"></span>
+              </label>
+              <label class="color-swatch-container">
+                <input type="radio" name="category-color" value="#3b82f6">
+                <span class="swatch" style="background-color: #3b82f6;"></span>
+              </label>
+              <label class="color-swatch-container">
+                <input type="radio" name="category-color" value="#10b981">
+                <span class="swatch" style="background-color: #10b981;"></span>
+              </label>
+              <label class="color-swatch-container">
+                <input type="radio" name="category-color" value="#f59e0b">
+                <span class="swatch" style="background-color: #f59e0b;"></span>
+              </label>
+              <label class="color-swatch-container">
+                <input type="radio" name="category-color" value="#ef4444">
+                <span class="swatch" style="background-color: #ef4444;"></span>
+              </label>
+              <label class="color-swatch-container">
+                <input type="radio" name="category-color" value="#ec4899">
+                <span class="swatch" style="background-color: #ec4899;"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="category-icon-select">Choose Icon</label>
+            <select id="category-icon-select">
+              <option value="briefcase">Briefcase</option>
+              <option value="user">User</option>
+              <option value="dumbbell">Dumbbell</option>
+              <option value="shopping-cart">Shopping Cart</option>
+              <option value="book-open">Book / Learn</option>
+              <option value="heart">Heart / Health</option>
+              <option value="code">Code / Development</option>
+              <option value="plane">Travel / Leisure</option>
+            </select>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button type="button" class="btn btn-secondary" id="cancel-category-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Category</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- 2. Subtask & Edit Modal -->
+  <dialog id="edit-task-dialog" class="glass-dialog">
+    <div class="dialog-content edit-dialog-content">
+      <div class="dialog-header">
+        <h2>Edit Task details</h2>
+        <button class="dialog-close-btn" id="close-edit-dialog-btn"><i data-lucide="x"></i></button>
+      </div>
+      <div class="dialog-body">
+        <!-- Edit Title -->
+        <div class="input-group">
+          <label for="edit-task-title">Task Title</label>
+          <input type="text" id="edit-task-title" required>
+        </div>
+
+        <div class="form-row-options">
+          <div class="option-group">
+            <label for="edit-task-category"><i data-lucide="tag"></i> Category</label>
+            <select id="edit-task-category"></select>
+          </div>
+          <div class="option-group">
+            <label for="edit-task-priority"><i data-lucide="flag"></i> Priority</label>
+            <select id="edit-task-priority">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <label for="edit-task-due-date"><i data-lucide="calendar"></i> Due Date</label>
+            <input type="date" id="edit-task-due-date">
+          </div>
+        </div>
+
+        <!-- Subtasks Section -->
+        <div class="subtasks-editor-section">
+          <h3>Sub-tasks / Checklist</h3>
+          
+          <div class="subtask-add-row">
+            <input type="text" id="new-subtask-title" placeholder="Add a sub-task step...">
+            <button class="btn btn-primary" id="add-subtask-action-btn"><i data-lucide="plus"></i></button>
+          </div>
+
+          <div class="subtask-list-edit-container" id="subtask-list-edit-container">
+            <!-- Dynamic Subtasks listing -->
+          </div>
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="btn btn-secondary" id="cancel-edit-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="save-task-btn">Save Changes</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
